@@ -84,7 +84,7 @@ ASCONFIGDIR="Config"
 
 ; The name of the account that the Analysis Services service runs under.
 
-ASSVCACCOUNT="<%=assvcaccount%>
+ASSVCACCOUNT="<%=assvcaccount%>"
 
 ASSVCPASSWORD="<%=assvcpassword%>"
 
@@ -156,7 +156,7 @@ NPENABLED="0"
 
 ; Startup type for Browser Service.
 
-BROWSERSVCSTARTUPTYPE="Disabled"
+BROWSERSVCSTARTUPTYPE="Automatic"
 
 ; Specifies which account the report server NT service should execute under.  When omitted or when the value is empty string, the default built-in account for the current operating system.
 ; The username part of RSSVCACCOUNT is a maximum of 20 characters long and
@@ -177,3 +177,7 @@ RSSVCSTARTUPTYPE="Automatic"
 ; Default value: “FilesOnly”
 
 RSINSTALLMODE="FilesOnlyMode"
+
+; Add description of input argument FTSVCACCOUNT
+
+FTSVCACCOUNT="NT AUTHORITY\LOCAL SERVICE"

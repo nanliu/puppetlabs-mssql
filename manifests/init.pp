@@ -1,15 +1,15 @@
 class mssql (
   # See http://msdn.microsoft.com/en-us/library/ms144259.aspx
   $media          = 'D:\\',
-  $instancename   = 'MSSQLSQLSERVER',
+  $instancename   = 'MSSQLSERVER',
   $features       = 'SQL,AS,RS,IS',
-  $agtsvcaccount  = "${hostname}\\SQLAGTSVC",
+  $agtsvcaccount  = 'SQLAGTSVC',
   $agtsvcpassword = 'sqlagtsvc2008demo',
-  $assvcaccount   = "${hostname}\\SQLASSVC",
+  $assvcaccount   = 'SQLASSVC',
   $assvcpassword  = 'sqlassvc2008demo',
-  $rssvcaccount   = "${hostname}\\SQLRSSVC",
+  $rssvcaccount   = 'SQLRSSVC',
   $rssvcpassword  = 'sqlrssvc2008demo',
-  $sqlsvcaccount  = "${hostname}\\SQLSVC",
+  $sqlsvcaccount  = 'SQLSVC',
   $sqlsvcpassword = 'sqlsvc2008demo',
   $instancedir    = "C:\\Program Files\\Microsoft SQL Server",
   $ascollation    = 'Latin1_General_CI_AS',
@@ -36,6 +36,7 @@ class mssql (
   }
   user { 'SQLSVC':
     comment  => 'SQL 2008 Service.',
+    groups   => 'Administrators',
     password => $sqlsvcpassword,
   }
 
@@ -53,6 +54,7 @@ class mssql (
     path      => $media,
     logoutput => true,
     creates   => $instancedir,
+    timeout   => 1200,
     require   => [ File['C:\sql2008install.ini'],
                    Dism['NetFx3'] ],
   }
