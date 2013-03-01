@@ -4,17 +4,18 @@ class mssql (
   $instancename   = 'MSSQLSERVER',
   $features       = 'SQL,AS,RS,IS',
   $agtsvcaccount  = 'SQLAGTSVC',
-  $agtsvcpassword = 'sqlagtsvc2008demo',
+  $agtsvcpassword = 'Sql!agt#2008demo',
   $assvcaccount   = 'SQLASSVC',
-  $assvcpassword  = 'sqlassvc2008demo',
+  $assvcpassword  = 'Sql!as#2008demo',
   $rssvcaccount   = 'SQLRSSVC',
-  $rssvcpassword  = 'sqlrssvc2008demo',
+  $rssvcpassword  = 'Sql!rs#2008demo',
   $sqlsvcaccount  = 'SQLSVC',
-  $sqlsvcpassword = 'sqlsvc2008demo',
+  $sqlsvcpassword = 'Sql!#2008demo',
   $instancedir    = "C:\\Program Files\\Microsoft SQL Server",
   $ascollation    = 'Latin1_General_CI_AS',
   $sqlcollation   = 'SQL_Latin1_General_CP1_CI_AS',
-  $admin          = 'Administrator'
+  $admin          = 'Administrator',
+  $sapwd          = undef
 ) {
 
   User {
@@ -42,14 +43,23 @@ class mssql (
 
   file { 'C:\sql2008install.ini':
     content => template('mssql/config.ini.erb'),
+    backup  => false,
   }
 
   dism { 'NetFx3':
     ensure => present,
   }
 
+  if $sapwd {
+    $install_cmd = "${media}\\setup.exe /Action=Install /IACCEPTSQLSERVERLICENSETERMS /QS /CONFIGURATIONFILE=C:\\sql2008install.ini /SQLSVCPASSWORD=\"${sqlsvcpassword}\" /AGTSVCPASSWORD=\"${agtsvcpassword}\" /ASSVCPASSWORD=\"${assvcpassword}\" /RSSVCPASSWORD=\"${rssvcpassword}\" /SECURITYMODE=SQL /SAPWD=\"$sapwd\""
+  } else {
+    $install_cmd = "${media}\\setup.exe /Action=Install /IACCEPTSQLSERVERLICENSETERMS /QS /CONFIGURATIONFILE=C:\\sql2008install.ini /SQLSVCPASSWORD=\"${sqlsvcpassword}\" /AGTSVCPASSWORD=\"${agtsvcpassword}\" /ASSVCPASSWORD=\"${assvcpassword}\" /RSSVCPASSWORD=\"${rssvcpassword}\""
+  }
+
+  # We should be able to switch to package resource in 3.0.x:
+  # http://projects.puppetlabs.com/issues/11870
   exec { 'install_mssql2008':
-    command   => "${media}\\setup.exe /Action=Install /IACCEPTSQLSERVERLICENSETERMS /QS /CONFIGURATIONFILE=C:\\sql2008install.ini /SQLSVCPASSWORD=\"${sqlsvcpassword}\" /AGTSVCPASSWORD=\"${agtsvcpassword}\" /ASSVCPASSWORD=\"${assvcpassword}\" /RSSVCPASSWORD=\"${rssvcpassword}\"",
+    command   => $install_cmd,
     cwd       => $media,
     path      => $media,
     logoutput => true,
@@ -57,5 +67,13 @@ class mssql (
     timeout   => 1200,
     require   => [ File['C:\sql2008install.ini'],
                    Dism['NetFx3'] ],
+  }
+
+  if 'SQL' in $features {
+    service { 'SQLSERVERAGENT':
+      ensure  => running,
+      enable  => true,
+      require => Exec['install_mssql2008'],
+    }
   }
 }
