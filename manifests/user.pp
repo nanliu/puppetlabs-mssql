@@ -1,3 +1,4 @@
+# Manages Microsoft SQL database user
 define mssql::user (
   $password,
   $default_database,

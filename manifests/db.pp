@@ -1,3 +1,4 @@
+# Manages Micrsoft SQL databases
 define mssql::db (
   $sqlcmd     = '"C:\Program Files\Microsoft SQL Server\100\Tools\Binn\sqlcmd.exe"',
   $mdf_file   = undef,
@@ -7,11 +8,12 @@ define mssql::db (
   $ldf_size   = '10MB',
   $ldf_growth = '10%',
   $collate    = 'Latin1_General_CS_AS',
-  # These settings are configure on database creation and not enforced subsequently:
+  # settings are configure on database creation and not enforced subsequently:
   $settings   = undef,
   $debug      = false,
 ) {
   require 'mssql'
+
 
   $create_sql = inline_template("
 USE [master]
@@ -35,6 +37,8 @@ GO")
   }
 
   if $settings {
+    validate_array($settings)
+
     $alter_sql = inline_template("
 USE [<%= @name %>]
 <% @settings.each do |l| -%>

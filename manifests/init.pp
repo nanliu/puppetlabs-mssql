@@ -1,5 +1,6 @@
+# Install Micrososft SQL 2008R2
+# See http://msdn.microsoft.com/en-us/library/ms144259.aspx
 class mssql (
-  # See http://msdn.microsoft.com/en-us/library/ms144259.aspx
   $media          = 'D:\\',
   $instancename   = 'MSSQLSERVER',
   $features       = 'SQL,AS,RS,IS',
@@ -11,7 +12,7 @@ class mssql (
   $rssvcpassword  = 'Sql!rs#2008demo',
   $sqlsvcaccount  = 'SQLSVC',
   $sqlsvcpassword = 'Sql!#2008demo',
-  $instancedir    = "C:\\Program Files\\Microsoft SQL Server",
+  $instancedir    = 'C:\Program Files\Microsoft SQL Server',
   $ascollation    = 'Latin1_General_CI_AS',
   $sqlcollation   = 'SQL_Latin1_General_CP1_CI_AS',
   $admin          = 'Administrator',
@@ -23,19 +24,19 @@ class mssql (
     before => Exec['install_mssql2008'],
   }
 
-  user { 'SQLAGTSVC':
+  user { $agtsvcaccount:
     comment  => 'SQL 2008 Agent Service.',
     password => $agtsvcpassword,
   }
-  user { 'SQLASSVC':
+  user { $assvcaccount:
     comment  => 'SQL 2008 Analysis Service.',
     password => $assvcpassword,
   }
-  user { 'SQLRSSVC':
+  user { $rssvcaccount:
     comment  => 'SQL 2008 Report Service.',
     password => $rssvcpassword,
   }
-  user { 'SQLSVC':
+  user { $sqlsvcaccount:
     comment  => 'SQL 2008 Service.',
     groups   => 'Administrators',
     password => $sqlsvcpassword,
@@ -51,7 +52,7 @@ class mssql (
   }
 
   if $sapwd {
-    $install_cmd = "${media}\\setup.exe /Action=Install /IACCEPTSQLSERVERLICENSETERMS /QS /CONFIGURATIONFILE=C:\\sql2008install.ini /SQLSVCPASSWORD=\"${sqlsvcpassword}\" /AGTSVCPASSWORD=\"${agtsvcpassword}\" /ASSVCPASSWORD=\"${assvcpassword}\" /RSSVCPASSWORD=\"${rssvcpassword}\" /SECURITYMODE=SQL /SAPWD=\"$sapwd\""
+    $install_cmd = "${media}\\setup.exe /Action=Install /IACCEPTSQLSERVERLICENSETERMS /QS /CONFIGURATIONFILE=C:\\sql2008install.ini /SQLSVCPASSWORD=\"${sqlsvcpassword}\" /AGTSVCPASSWORD=\"${agtsvcpassword}\" /ASSVCPASSWORD=\"${assvcpassword}\" /RSSVCPASSWORD=\"${rssvcpassword}\" /SECURITYMODE=SQL /SAPWD=\"${sapwd}\""
   } else {
     $install_cmd = "${media}\\setup.exe /Action=Install /IACCEPTSQLSERVERLICENSETERMS /QS /CONFIGURATIONFILE=C:\\sql2008install.ini /SQLSVCPASSWORD=\"${sqlsvcpassword}\" /AGTSVCPASSWORD=\"${agtsvcpassword}\" /ASSVCPASSWORD=\"${assvcpassword}\" /RSSVCPASSWORD=\"${rssvcpassword}\""
   }
@@ -65,8 +66,10 @@ class mssql (
     logoutput => true,
     creates   => $instancedir,
     timeout   => 1200,
-    require   => [ File['C:\sql2008install.ini'],
-                   Dism['NetFx3'] ],
+    require   => [
+      File['C:\sql2008install.ini'],
+      Dism['NetFx3'],
+    ],
   }
 
   if 'SQL' in $features {
