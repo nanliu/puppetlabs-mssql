@@ -14,6 +14,7 @@ define mssql::db (
 ) {
   require 'mssql'
 
+  $verify_db = "IF EXISTS( SELECT * FROM master.sys.databases WHERE name='${name}' ) SELECT 0 ELSE SELECT 1"
 
   $create_sql = inline_template("
 USE [master]
@@ -27,7 +28,11 @@ LOG ON
 (NAME = N'<%= @name %>_log', FILENAME = N'<%= @ldf_file %>', SIZE = <%= @ldf_size %>, FILEGROWTH = <%= @ldf_growth %> )
 <% end -%>
 COLLATE <%= @collate %>
-GO")
+GO
+
+-- This provides the correct exit code:
+<% @verify_db %>
+")
 
   exec { "create_db_${name}":
     path      => $::path,
