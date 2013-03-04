@@ -28,6 +28,8 @@ GO")
   }
 
   if $roles {
+    validate_array($roles)
+
     $role_sql = inline_template("
 USE [<%= @default_database %>]
 GO

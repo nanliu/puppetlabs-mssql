@@ -1,0 +1,6 @@
+fixtures:
+  repositories:
+    'stdlib': "git://github.com/puppetlabs/puppetlabs-stdlib.git"
+    'dism': "git://github.com/nanliu/puppetlabs-dism.git"
+  symlinks:
+    'mssql': "#{source_dir}"
