@@ -10,6 +10,8 @@ define mssql::user (
 ) {
   require 'mssql'
 
+  $verify_user = "IF EXISTS( SELECT * FROM master.sys.server_principals WHERE name='${name}' ) SELECT 0 ELSE SELECT 1"
+
   $create_sql = inline_template("
 USE [<%= @default_database %>]
 CREATE LOGIN [<%= @name %>] WITH PASSWORD = N'<%= @password %>',
@@ -17,12 +19,15 @@ DEFAULT_DATABASE = [<%= @default_database %>],
 DEFAULT_LANGUAGE = [<%= @default_language %>],
 CHECK_POLICY = <%= @check_policy %>
 CREATE USER [<%= @name %>] FOR LOGIN [<%= @name %>]
-GO")
+GO
+
+<%= @verify_user %>
+")
 
   exec { "create_user_${name}":
     path      => $::path,
-    command   => "${sqlcmd} -Q \"${create_sql}\"",
-    unless    => "${sqlcmd} -Q \"exit(if exists(select * from master.sys.server_principals where name='${name}') select 0 else select 1)\"",
+    command   => "${sqlcmd} -Q \"exit(${create_sql})\"",
+    unless    => "${sqlcmd} -Q \"exit(${verify_user})\"",
     logoutput => true,
     require   => Mssql::Db[$default_database],
   }
