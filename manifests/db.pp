@@ -28,16 +28,14 @@ LOG ON
 (NAME = N'<%= @name %>_log', FILENAME = N'<%= @ldf_file %>', SIZE = <%= @ldf_size %>, FILEGROWTH = <%= @ldf_growth %> )
 <% end -%>
 COLLATE <%= @collate %>
-GO
 
--- This provides the correct exit code:
-<% @verify_db %>
+<%= @verify_db %>
 ")
 
   exec { "create_db_${name}":
     path      => $::path,
-    command   => "${sqlcmd} -Q \"${create_sql}\"",
-    unless    => "${sqlcmd} -Q \"exit(if exists(select * from master.sys.databases where name='${name}') select 0 else select 1)\"",
+    command   => "${sqlcmd} -Q \"exit(${create_sql})\"",
+    unless    => "${sqlcmd} -Q \"exit(${verify_db})\"",
     logoutput => true,
   }
 
