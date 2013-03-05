@@ -19,7 +19,6 @@ DEFAULT_DATABASE = [<%= @default_database %>],
 DEFAULT_LANGUAGE = [<%= @default_language %>],
 CHECK_POLICY = <%= @check_policy %>
 CREATE USER [<%= @name %>] FOR LOGIN [<%= @name %>]
-GO
 
 <%= @verify_user %>
 ")
