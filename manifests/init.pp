@@ -78,5 +78,13 @@ class mssql (
       enable  => true,
       require => Exec['install_mssql2008'],
     }
+
+    # open the firewall port:
+    exec { 'open_port_1433':
+      command   => 'netsh.exe advfirewall firewall add rule name="SQL" dir=in action=allow protocol=tcp localport=1433',
+      logoutput => true,
+      path      => $::path,
+      unless    => 'netsh.exe advfirewall firewall show rule name="SQL"',
+    }
   }
 }
